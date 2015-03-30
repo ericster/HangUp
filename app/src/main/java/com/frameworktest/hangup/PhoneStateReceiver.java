@@ -49,10 +49,11 @@ public class PhoneStateReceiver extends BroadcastReceiver {
     }
 
     public boolean killCall(Context context) {
+        Log.d(TAG, "PhoneStateReceiver: inside killCall() ");
+
         try {
             // Get the boring old TelephonyManager
-            TelephonyManager telephonyManager =
-                    (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
             // Get the getITelephony() method
             Class classTelephony = Class.forName(telephonyManager.getClass().getName());
@@ -67,14 +68,21 @@ public class PhoneStateReceiver extends BroadcastReceiver {
             // Get the endCall method from ITelephony
             Class telephonyInterfaceClass =
                     Class.forName(telephonyInterface.getClass().getName());
-//            Method methodEndCall = telephonyInterfaceClass.getDeclaredMethod("endCall");
             try {
-                Method methodEndCall = telephonyInterfaceClass.getDeclaredMethod("answerRingingCall");
+                Method methodIsRinging = telephonyInterfaceClass.getDeclaredMethod("isRinging");
+                boolean isRinging = (boolean)methodIsRinging.invoke(telephonyInterface);
+                Method methodanswerRingingCall = telephonyInterfaceClass.getDeclaredMethod("answerRingingCall");
+                Method methodEndCall = telephonyInterfaceClass.getDeclaredMethod("endCall");
+                if(isRinging){
+                    Log.v(TAG, "Answering Call now...");
+                    methodanswerRingingCall.invoke(telephonyInterface);
+                }
+                Thread.sleep(1000);
+                Log.v(TAG, "Call answered...");
                 methodEndCall.invoke(telephonyInterface);
+                Log.v(TAG, "Call ended...");
             } catch (InvocationTargetException ex) {
                 Log.d(TAG, "oops!" + ex.getCause()); }
-
-            // Invoke endCall()
 
         } catch (Exception ex) { // Many things can go wrong with reflection calls
             Log.d(TAG,"PhoneStateReceiver **" + ex.toString());
