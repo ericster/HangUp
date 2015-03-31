@@ -70,14 +70,12 @@ public class PhoneStateReceiver extends BroadcastReceiver {
                     Class.forName(telephonyInterface.getClass().getName());
             try {
                 Method methodIsRinging = telephonyInterfaceClass.getDeclaredMethod("isRinging");
-                boolean isRinging = (boolean)methodIsRinging.invoke(telephonyInterface);
                 Method methodanswerRingingCall = telephonyInterfaceClass.getDeclaredMethod("answerRingingCall");
                 Method methodEndCall = telephonyInterfaceClass.getDeclaredMethod("endCall");
-                if(isRinging){
+                while((boolean)methodIsRinging.invoke(telephonyInterface)){
                     Log.v(TAG, "Answering Call now...");
                     methodanswerRingingCall.invoke(telephonyInterface);
                 }
-                Thread.sleep(1000);
                 Log.v(TAG, "Call answered...");
                 methodEndCall.invoke(telephonyInterface);
                 Log.v(TAG, "Call ended...");
